@@ -1,9 +1,9 @@
 clear all
 close all
 serialportlist
-s = serialport("COM23",115200);
+s = serialport("COM24",115200);
 configureTerminator(s,"CR/LF");
-writeline(s,"sp=100") %데이터 전송주기 [ms]
+writeline(s,"sp=10") %데이터 전송주기 [ms]
 writeline(s,"as=3") % 가속도 스케일
 writeline(s,"gs=3")
 writeline(s,"zro") % 각도 데이터 리셋
@@ -20,7 +20,7 @@ writeline(s,"zro") % 각도 데이터 리셋
 % writeline(s,"ss=9") % 가속도, 자기
 % writeline(s,"ss=10") % 각속도, 자기
 % writeline(s,"ss=11") % 가속도, 각속도, 자기 
-writeline(s,"ss=15") % 가속도, 각속도, 각도, 자기
+writeline(s,"ss=15") % 가속도, 각속도,  각도, 자기
 sampling_time = 0.1;
 x_pos = 0;
 y_pos = 0;
@@ -34,19 +34,23 @@ time_interval = 0:sampling_time:Nsamples;
 firstrun = [];
 pre_data = zeros(1,7);
 for t = 1:Nsamples
+   tic;
+   if mod(t,10) == 0
+        rawdata = readline(s);
+        disp(rawdata)
+        data_str = split(rawdata);
+        data = double(data_str);
 
-    rawdata = readline(s);
-    disp(rawdata)
-    data_str = split(rawdata);
-    data = double(data_str);
 
-    
-    if size(data,1) >2
-        x_acc = data(2);
-        y_acc = data(3);
-        theta = data(7);
-        timestep = timestep + 1;
-    end
+        if size(data,1) >2
+            x_acc = data(2);
+            y_acc = data(3);
+            theta = data(7);
+            timestep = timestep + 1;
+        end
+        
+        toc;
+   end
     
 end
 
